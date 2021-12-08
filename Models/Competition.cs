@@ -28,6 +28,8 @@ namespace Sporting_Events.Models
         public int MembersCount { get; set; }
         public int PrizePool { get; set; }
         public int TypeId { get; set; }
-        public Type Type { get; set; }
+        public CompetitionType CompetitionType { get; set; }
+
+        public List<Account> Accounts = new List<Account>();
     }
 }
