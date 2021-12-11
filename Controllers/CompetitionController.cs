@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Sporting_Events.Models;
+using Sporting_Events.ViewModels;
 
 namespace Sporting_Events.Controllers
 {
@@ -46,25 +50,55 @@ namespace Sporting_Events.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "organizer")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Competition competition)
+        public async Task<IActionResult> Create(Competition dto, IFormFile Upload)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(competition);
+                var competition = new Competition
+                {
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Date = dto.Date,
+                    ExpDate = dto.ExpDate,
+                    Location = dto.Location,
+                    MembersCount = dto.MembersCount,
+                    PrizePool = dto.PrizePool,
+                    CompetitionTypeId = dto.CompetitionTypeId
+                };
+
+                if (Upload != null && Upload.Length > 0)
+                {
+                    using var memoryStream = new MemoryStream();
+                    await Upload.CopyToAsync(memoryStream);
+                    if (memoryStream.Length < 2097152)
+                    {
+                        var file = new AppFile
+                        {
+                            Content = memoryStream.ToArray()
+                        };
+                        await _context.Files.AddAsync(file);
+                        await _context.SaveChangesAsync();
+                        competition.AppFileId = file.Id;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("File", "Файл имеет слишком большой размер!");
+                    }
+                }
+
+                await _context.Competitions.AddAsync(competition);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(competition);
             }
-            return View(competition);
+            return View(dto);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        [HttpGet]
+        [Authorize(Roles = "organizer")]
+        public async Task<IActionResult> Update(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var competition = await _context.Competitions.FindAsync(id);
             if (competition == null)
             {
@@ -74,35 +108,57 @@ namespace Sporting_Events.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "organizer")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Competition competition)
+        public async Task<IActionResult> Update(int id, Competition dto, IFormFile Upload)
         {
-            if (id != competition.Id)
+            var competition = await _context.Competitions.FindAsync(id);
+
+            if (competition == null)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                try
+                competition.Name = dto.Name;
+                competition.Description = dto.Description;
+                competition.Date = dto.Date;
+                competition.ExpDate = dto.ExpDate;
+                competition.Location = dto.Location;
+                competition.MembersCount = dto.MembersCount;
+                competition.PrizePool = dto.PrizePool;
+                competition.CompetitionTypeId = dto.CompetitionTypeId;
+                if (Upload != null && Upload.Length > 0)
                 {
-                    _context.Update(competition);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CompetitionExists(competition.Id))
+                    using var memoryStream = new MemoryStream();
+                    await Upload.CopyToAsync(memoryStream);
+                    if (memoryStream.Length < 2097152)
                     {
-                        return NotFound();
+                        var file = new AppFile
+                        {
+                            Content = memoryStream.ToArray()
+                        };
+                        var oldFile = await _context.Files.FindAsync(competition.AppFileId);
+                        if (oldFile != null)
+                        {
+                            _context.Files.Remove(oldFile);
+                        }
+
+                        await _context.Files.AddAsync(file);
+                        await _context.SaveChangesAsync();
+                        competition.AppFileId = file.Id;
                     }
                     else
                     {
-                        throw;
+                        ModelState.AddModelError("File", "Файл имеет слишком большой размер!");
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                _context.Competitions.Update(competition);
+                await _context.SaveChangesAsync();
+                return View(competition);
             }
-            return View(competition);
+            return View(dto);
         }
 
         public async Task<IActionResult> Delete(int? id)
