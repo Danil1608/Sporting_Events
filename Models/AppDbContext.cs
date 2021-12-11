@@ -16,6 +16,7 @@ namespace Sporting_Events.Models
         public DbSet<Request> Requests { get; set; }
         public DbSet<CompetitionType> CompetitionTypes { get; set; }
         public DbSet<Result> Results { get; set; }
+        public DbSet<AppFile> Files { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

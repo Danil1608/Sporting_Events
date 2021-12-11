@@ -26,9 +26,14 @@ namespace Sporting_Events.Models
         public string Location { get; set; }
 
         public int MembersCount { get; set; }
+
         public int PrizePool { get; set; }
-        public int TypeId { get; set; }
+
+        public int CompetitionTypeId { get; set; }
         public CompetitionType CompetitionType { get; set; }
+
+        public int? AppFileId { get; set; }
+        public AppFile AppFile { get; set; }
 
         public List<Account> Accounts = new();
     }
