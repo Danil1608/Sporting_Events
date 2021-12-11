@@ -16,9 +16,21 @@ namespace Sporting_Events.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int option = 0)
         {
-            return View(await _context.Competitions.Include(c => c.Accounts).Include(c => c.CompetitionType).ToListAsync());
+            if (option == 1)
+            {
+                return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts)
+                    .Include(c => c.CompetitionType).Where(x => DateTime.Now.CompareTo(x.Date) < 0).ToListAsync());
+            }
+
+            if (option == 2)
+            {
+                return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts)
+                    .Include(c => c.CompetitionType).Where(x => DateTime.Now.CompareTo(x.ExpDate) > 0).ToListAsync());
+            }
+
+            return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts).Include(c => c.CompetitionType).ToListAsync());
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
