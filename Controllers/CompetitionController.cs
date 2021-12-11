@@ -22,9 +22,11 @@ namespace Sporting_Events.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "organizer")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Competitions.Include(c => c.Accounts).Include(c => c.CompetitionType).ToListAsync());
+            return View(await _context.Competitions.Include(c => c.Accounts).Include(c => c.CompetitionType).Include(c => c.AppFile).ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -44,6 +46,8 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "organizer")]
         public IActionResult Create()
         {
             return View();
@@ -161,6 +165,8 @@ namespace Sporting_Events.Controllers
             return View(dto);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "organizer")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -178,6 +184,7 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
+        [Authorize(Roles = "organizer")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
