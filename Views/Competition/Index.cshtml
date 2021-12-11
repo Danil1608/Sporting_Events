@@ -1,77 +1,49 @@
-﻿@model IEnumerable<Sporting_Events.Models.Competition>
+﻿@model List<Sporting_Events.Models.Competition>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Работа с мероприятиями";
 }
 
-<h1>Index</h1>
+<h1>Работа с мероприятиями</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Создать мероприятие</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExpDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Location)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MembersCount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrizePool)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TypeId)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExpDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MembersCount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PrizePool)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TypeId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@foreach (var c in Model)
+{
+    <div class="competition-card d-flex">
+        <div class="img-container">
+            <img src="data:image/jpeg;base64,@(Convert.ToBase64String(c.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+        </div>
+        <div class="competition-card-info">
+            <div class="mb-2">
+                <span>@c.Date</span>
+            </div>
+            <div class="mb-2">
+                <h5>@c.Name</h5>
+            </div>
+            <div class="mb-2">
+                <p class="card-text">@c.Description</p>
+            </div>
+            <div class="mb-2">
+                <span>@c.Location</span>
+            </div>
+        </div>
+        <div class="competition-card-actions">
+            <div>
+                @if (c.MembersCount > c.Accounts.Where(a => a.RoleId == 2).ToList().Count)
+                {
+                    <span>Мест осталось: </span><span>@(c.MembersCount - c.Accounts.Where(a => a.RoleId == 2).ToList().Count)</span>
+                }
+                else
+                {
+                    <span>Нет мест</span>
+                }
+            </div>
+            <span class="competition-prizepool">@c.PrizePool &#x20bd;</span>
+            <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@c.Id">Подробнее</a>
+            <a class="btn btn-outline-primary" asp-action="Update" asp-route-id="@c.Id">Редактировать</a>
+            <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@c.Id">Удалить</a>
+        </div>
+    </div>
 }
-    </tbody>
-</table>
