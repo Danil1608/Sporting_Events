@@ -56,8 +56,9 @@
                 <span asp-validation-for="CompetitionTypeId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label for="Upload" class="control-label">Фото</label>
-                <input name="Upload" type="file" class="form-control" />
+                <label for="upload" class="control-label">Фото</label>
+                <input name="upload" type="file" class="form-control" />
+                <span asp-validation-for="AppFile" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Создать" class="btn btn-primary" />

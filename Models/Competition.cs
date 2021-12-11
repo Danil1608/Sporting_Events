@@ -32,9 +32,12 @@ namespace Sporting_Events.Models
         public int CompetitionTypeId { get; set; }
         public CompetitionType CompetitionType { get; set; }
 
+        public int? OrganizerId { get; set; }
+        public Account Account { get; set; }
+
         public int? AppFileId { get; set; }
         public AppFile AppFile { get; set; }
 
-        public List<Account> Accounts = new();
+        public List<Account> Accounts { get; set; } = new();
     }
 }

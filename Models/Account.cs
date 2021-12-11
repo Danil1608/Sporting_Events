@@ -33,6 +33,9 @@ namespace Sporting_Events.Models
         public int RoleId { get; set; }
         public Role Role { get; set; }
 
-        public List<Competition> Competitions = new();
+        public List<Competition> Competitions { get; set; } = new();
+        public List<Request> Requests { get; set; } = new();
+        public List<Result> Results { get; set; } = new();
+        public List<Competition> OrganizersCompetitions { get; set; } = new();
     }
 }

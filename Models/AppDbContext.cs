@@ -25,17 +25,34 @@ namespace Sporting_Events.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Request>()
+                .HasOne(x => x.Account)
+                .WithMany(x => x.Requests)
+                .HasForeignKey(x => x.AccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Result>()
+                .HasOne(x => x.Account)
+                .WithMany(x => x.Results)
+                .HasForeignKey(x => x.AccountId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Account>()
                 .HasMany(x => x.Competitions)
                 .WithMany(x => x.Accounts);
+
+            modelBuilder.Entity<Competition>()
+                .HasOne(x => x.Account)
+                .WithMany(x => x.OrganizersCompetitions)
+                .HasForeignKey(x => x.OrganizerId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "admin" },
                 new Role { Id = 2, Name = "sportsman" },
                 new Role { Id = 3, Name = "organizer" }
             );
-            
+
             modelBuilder.Entity<CompetitionType>().HasData(
                 new CompetitionType { Id = 1, Name = "running" },
                 new CompetitionType { Id = 2, Name = "longjumping" },
