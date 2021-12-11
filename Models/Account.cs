@@ -33,6 +33,6 @@ namespace Sporting_Events.Models
         public int RoleId { get; set; }
         public Role Role { get; set; }
 
-        public List<Competition> Competitions = new List<Competition>();
+        public List<Competition> Competitions = new();
     }
 }

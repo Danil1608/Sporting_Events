@@ -30,6 +30,6 @@ namespace Sporting_Events.Models
         public int TypeId { get; set; }
         public CompetitionType CompetitionType { get; set; }
 
-        public List<Account> Accounts = new List<Account>();
+        public List<Account> Accounts = new();
     }
 }
