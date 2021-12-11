@@ -18,13 +18,11 @@ namespace Sporting_Events.Controllers
             _context = context;
         }
 
-        // GET: Competition
         public async Task<IActionResult> Index()
         {
             return View(await _context.Competitions.Include(c => c.Accounts).Include(c => c.CompetitionType).ToListAsync());
         }
 
-        // GET: Competition/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,18 +40,14 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
-        // GET: Competition/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Competition/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Date,ExpDate,Location,MembersCount,PrizePool,TypeId")] Competition competition)
+        public async Task<IActionResult> Create(Competition competition)
         {
             if (ModelState.IsValid)
             {
@@ -64,7 +58,6 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
-        // GET: Competition/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,12 +73,9 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
-        // POST: Competition/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Date,ExpDate,Location,MembersCount,PrizePool,TypeId")] Competition competition)
+        public async Task<IActionResult> Edit(int id, Competition competition)
         {
             if (id != competition.Id)
             {
@@ -115,7 +105,6 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
-        // GET: Competition/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -133,7 +122,6 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
-        // POST: Competition/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

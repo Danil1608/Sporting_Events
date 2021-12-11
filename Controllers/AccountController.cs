@@ -53,7 +53,7 @@ namespace Sporting_Events.Controllers
                     };
                     await _context.Accounts.AddAsync(account);
                     await _context.SaveChangesAsync();
-                    await Authenticate(account);
+                    await Authenticate(account.Id);
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -82,18 +82,18 @@ namespace Sporting_Events.Controllers
                     .FirstOrDefaultAsync(u => u.Login == model.Login && u.Password == Encoding.UTF8.GetString(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(model.Password))));
                 if (account != null)
                 {
-                    await Authenticate(account);
+                    await Authenticate(account.Id);
 
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError("", "Некорректные логин и(или) пароль");
             }
-
             return View(model);
         }
 
-        private async Task Authenticate(Account account)
+        private async Task Authenticate(int accountId)
         {
+            Account account = await _context.Accounts.Include(a => a.Role).FirstOrDefaultAsync(a => a.Id == accountId);
             var claims = new List<Claim>
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, account.Login),
@@ -148,12 +148,32 @@ namespace Sporting_Events.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            Account account = await _context.Accounts.FindAsync(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var account = await _context.Accounts
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            return View(account);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var account = await _context.Accounts.FindAsync(id);
             _context.Accounts.Remove(account);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Account");
+            return RedirectToAction(nameof(Index));
         }
     }
 }
