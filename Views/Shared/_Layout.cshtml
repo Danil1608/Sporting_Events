@@ -16,9 +16,18 @@
             </button>
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <div class="navbar-nav flex-grow-1 justify-content-between">
-                    <a class="navbar-brand nav-item" asp-controller="Home" asp-action="Index">Спортивные мероприятия</a>
-                    <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Предстоящие события</a>
-                    <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Завершенные мероприятия</a>
+                    <form method="get" asp-controller="Home" asp-action="Index">
+                        <input name="option" type="hidden" value="0" />
+                        <input class="navbar-brand nav-link bg-white border-0 text-dark" type="submit" value="Спортивные мероприятия" />
+                    </form>
+                    <form method="get" asp-controller="Home" asp-action="Index">
+                        <input name="option" type="hidden" value="1" />
+                        <input class="navbar-brand nav-link bg-white border-0 text-dark" type="submit" value="Предстоящие события" />
+                    </form>
+                    <form method="get" asp-controller="Home" asp-action="Index">
+                        <input name="option" type="hidden" value="2" />
+                        <input class="navbar-brand nav-link bg-white border-0 text-dark" type="submit" value="Завершенные мероприятия" />
+                    </form>
                     <div class="nav-item d-inline-flex">
                         @{
                             if (!User.Identity.IsAuthenticated)
@@ -37,7 +46,7 @@
                                     <span class="nav-item">
                                         <a class="nav-link text-dark" asp-controller="Competition" asp-action="Index">Для организатора</a>
                                     </span>
-                                } 
+                                }
                                 else if (User.IsInRole("admin"))
                                 {
                                     <span class="nav-item">

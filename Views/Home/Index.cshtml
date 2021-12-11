@@ -1,8 +1,53 @@
-﻿@{
+﻿@model List<Sporting_Events.Models.Competition>
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex flex-column">
+    <h1 class="display-4 align-self-center">Спортивные события</h1>
+    @foreach (var c in Model)
+    {
+        <div class="competition-card d-flex">
+            <div class="img-container">
+                <img src="data:image/jpeg;base64,@(Convert.ToBase64String(c.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+            </div>
+            <div class="competition-card-info">
+                <div class="mb-2">
+                    <span>@c.Date</span>
+                </div>
+                <div class="mb-2">
+                    <h5>@c.Name</h5>
+                </div>
+                <div class="mb-2">
+                    <p class="card-text">@c.Description</p>
+                </div>
+                <div class="mb-2">
+                    <span>@c.Location</span>
+                </div>
+            </div>
+            <div class="competition-card-actions">
+                <div>
+                    @if (c.MembersCount > c.Accounts.Where(a => a.RoleId == 2).ToList().Count)
+                    {
+                        <span>Мест осталось: </span><span>@(c.MembersCount - c.Accounts.Where(a => a.RoleId == 2).ToList().Count)</span>
+                    }
+                    else
+                    {
+                        <span>Нет мест</span>
+                    }
+                </div>
+                <span class="competition-prizepool">@c.PrizePool &#x20bd;</span>
+                <form method="post" asp-controller="Request" asp-action="Create">
+                    @if (User.IsInRole("sportsman"))
+                    {
+                        <input type="submit" value="Отправить заявку" class="btn btn-outline-success" />
+                    }
+                    else
+                    {
+                        <input type="submit" disabled value="Отправить заявку" class="btn btn-outline-dark" />
+                    }
+                </form>
+            </div>
+        </div>
+    }
 </div>
