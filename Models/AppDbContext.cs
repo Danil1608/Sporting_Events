@@ -17,8 +17,6 @@ namespace Sporting_Events.Models
         public DbSet<CompetitionType> CompetitionTypes { get; set; }
         public DbSet<Result> Results { get; set; }
 
-
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer($"Server={Environment.MachineName};Database=SportingEventsDb;Trusted_Connection=True;");
