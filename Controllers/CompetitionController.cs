@@ -205,7 +205,7 @@ namespace Sporting_Events.Controllers
         [Authorize(Roles = "organizer")]
         public async Task<IActionResult> Delete(int id)
         {
-            var competition = await _context.Competitions.FindAsync(id);
+            var competition = await _context.Competitions.Include(c => c.AppFile).FirstOrDefaultAsync(c => c.Id == id);
 
             if (competition == null)
             {
