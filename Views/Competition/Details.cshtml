@@ -1,66 +1,122 @@
 ﻿@model Sporting_Events.Models.Competition
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Подробнее";
 }
 
-<h1>Details</h1>
+<h1>Подробнее</h1>
 
-<div>
-    <h4>Competition</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Date)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Date)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExpDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExpDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Location)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Location)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MembersCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MembersCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrizePool)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrizePool)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CompetitionTypeId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CompetitionTypeId)
-        </dd>
-    </dl>
+<div class="competition-card d-flex">
+    <div class="img-container">
+        <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+    </div>
+    <div class="competition-card-info">
+        <div class="mb-2">
+            <span>@Model.Date</span>
+        </div>
+        <div class="mb-2">
+            <h5>@Model.Name</h5>
+        </div>
+        <div class="mb-2">
+            <p class="card-text">@Model.Description</p>
+        </div>
+        <div class="competition-location">
+            <span>@Model.Location</span>
+        </div>
+    </div>
+    <div class="competition-card-actions">
+        <div>
+            @if (Model.MembersCount > Model.Accounts.Where(a => a.RoleId == 2).ToList().Count)
+            {
+                <span>Мест осталось: </span><span>@(Model.MembersCount - Model.Accounts.Where(a => a.RoleId == 2).ToList().Count)</span>
+            }
+            else
+            {
+                <span>Нет мест</span>
+            }
+        </div>
+        <span class="competition-prizepool">@Model.PrizePool &#x20bd;</span>
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Удалить" class="btn btn-outline-danger" />
+        </form>
+    </div>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <p>
+        <a class="btn btn-primary" data-toggle="collapse" href="#accounts" role="button" aria-expanded="false" aria-controls="accounts">
+            Список участников
+        </a>
+        <a class="btn btn-primary" data-toggle="collapse" href="#requests" role="button" aria-expanded="false" aria-controls="requests">
+            Заявки на участие
+        </a>
+    </p>
+    <div class="collapse" id="accounts">
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        ФИО Участника
+                    </th>
+                    <th>
+                        Возраст
+                    </th>
+                    <th>
+                        Номер телефона
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var acc in Model.Accounts)
+                {
+                    <tr>
+                        <td>
+                            @acc.LastName @acc.Name @acc.MiddleName
+                        </td>
+                        <td>
+                            @acc.Age
+                        </td>
+                        <td>
+                            @acc.Phone
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="collapse" id="requests">
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        ФИО Участника
+                    </th>
+                    <th>
+                        Возраст
+                    </th>
+                    <th>
+                        Номер телефона
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @*@foreach (var acc in Model.Req)
+                {
+                    <tr>
+                        <td>
+                            @acc.LastName @acc.Name @acc.MiddleName
+                        </td>
+                        <td>
+                            @acc.Age
+                        </td>
+                        <td>
+                            @acc.Phone
+                        </td>
+                    </tr>
+                }*@
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<a asp-action="Index">Вернуться к списку соревнований</a>
