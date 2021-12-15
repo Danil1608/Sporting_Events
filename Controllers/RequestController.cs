@@ -41,15 +41,19 @@ namespace Sporting_Events.Controllers
         [HttpPost]
         public async Task<IActionResult> Update(int id, Request req)
         {
-            Request request = await _context.Requests.Include(x => x.Competition).FirstOrDefaultAsync(x => x.Id == id);
+            Request request = await _context.Requests.Include(x => x.Competition).ThenInclude(x => x.Accounts).FirstOrDefaultAsync(x => x.Id == id);
             request.Status = req.Status;
 
-            if (request.Status == "Принята")
+            if (request.Status == "Принята" && request.Competition.Accounts.Count < request.Competition.MembersCount)
             {
                 Account account = await _context.Accounts.FindAsync(request.AccountId);
                 account.Competitions.Add(request.Competition);
 
                 _context.Accounts.Update(account);
+            }
+            else if (request.Competition.Accounts.Count > request.Competition.MembersCount  && request.Status != "Отклонена")
+            {
+                return BadRequest(new { error = "Нет мест" });
             }
 
             _context.Requests.Update(request);

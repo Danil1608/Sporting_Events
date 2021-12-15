@@ -32,6 +32,12 @@ namespace Sporting_Events.Controllers
             if (option == 2)
             {
                 return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts)
+                    .Include(c => c.CompetitionType).Where(x => (DateTime.Now.CompareTo(x.ExpDate) < 0 && DateTime.Now.CompareTo(x.Date) > 0)).ToListAsync());
+            }
+
+            if (option == 3)
+            {
+                return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts)
                     .Include(c => c.CompetitionType).Where(x => DateTime.Now.CompareTo(x.ExpDate) > 0).ToListAsync());
             }
 

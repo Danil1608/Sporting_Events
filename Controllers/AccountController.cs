@@ -114,19 +114,6 @@ namespace Sporting_Events.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> Profile()
-        {
-            var accountId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            Account account = await _context.Accounts
-                .Include(a => a.Role)
-                .Include(a => a.Competitions)
-                .FirstOrDefaultAsync(a => a.Id == accountId);
-
-            return View(account);
-        }
-
-        [HttpGet]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Index(int roleId = 0)
         {

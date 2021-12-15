@@ -369,7 +369,7 @@ namespace Sporting_Events.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "organizer")]
+        [Authorize(Roles = "organizer, admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var competition = await _context.Competitions.Include(c => c.AppFile).FirstOrDefaultAsync(c => c.Id == id);
@@ -382,21 +382,27 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
-        [Authorize(Roles = "organizer")]
+        [Authorize(Roles = "organizer, admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var competition = await _context.Competitions.FindAsync(id);
 
-            if (competition.OrganizerId != Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            if(User.IsInRole("admin"))
+            {
+                _context.Competitions.Remove(competition);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", "Home");
+            } else if (competition.OrganizerId != Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            {
+                _context.Competitions.Remove(competition);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            } else
             {
                 return Forbid();
             }
-
-            _context.Competitions.Remove(competition);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }
