@@ -68,7 +68,7 @@
             </a>
         </p>
         <div class="collapse" id="accounts">
-            <table>
+            <table border="1" bordercolor="#dee2e6" class="table">
                 <thead>
                     <tr>
                         <th>
@@ -101,7 +101,7 @@
             </table>
         </div>
         <div class="collapse" id="requests">
-            <table>
+            <table border="1" bordercolor="#dee2e6" class="table">
                 <thead>
                     <tr>
                         <th>
@@ -113,23 +113,58 @@
                         <th>
                             Номер телефона
                         </th>
+                        <th>
+                            Принять
+                        </th>
+                        <th>
+                            Отклонить
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                   @* @foreach (var req in Model.Requests)
-                        {
-                            <tr>
+                    @foreach (var req in Model.Requests)
+                    {
+                        <tr>
+                            <td>
+                                @req.Account.LastName @req.Account.Name @req.Account.MiddleName
+                            </td>
+                            <td>
+                                @req.Account.Age
+                            </td>
+                            <td>
+                                @req.Account.Phone
+                            </td>
+                            @if (req.Status == "На рассмотрении")
+                            {
                                 <td>
-                                    @acc.LastName @acc.Name @acc.MiddleName
+                                    <form method="post" asp-action="Update" asp-controller="Request">
+                                        <input type="hidden" value="@req.Id" name="id" />
+                                        <input type="hidden" value="@req.Id" asp-for="@req.Id" />
+                                        <input type="hidden" value="@req.AccountId" asp-for="@req.AccountId" />
+                                        <input type="hidden" value="@req.CompetitionId" asp-for="@req.CompetitionId" />
+                                        <input type="hidden" value="Принята" asp-for="@req.Status" />
+                                        <input type="submit" value="Принять" class="btn btn-success" />
+                                    </form>
                                 </td>
                                 <td>
-                                    @acc.Age
+                                    <form method="post" asp-action="Update" asp-controller="Request">
+                                        <input type="hidden" value="@req.Id" name="id" />
+                                        <input type="hidden" value="@req.Id" asp-for="@req.Id" />
+                                        <input type="hidden" value="@req.AccountId" asp-for="@req.AccountId" />
+                                        <input type="hidden" value="@req.CompetitionId" asp-for="@req.CompetitionId" />
+                                        <input type="hidden" value="Отклонена" asp-for="@req.Status" />
+                                        <input type="submit" value="Отклонить" class="btn btn-danger" />
+                                    </form>
                                 </td>
+                            } 
+                            else
+                            {
                                 <td>
-                                    @acc.Phone
+                                    @req.Status
                                 </td>
-                            </tr>
-                        }*@
+                            }
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

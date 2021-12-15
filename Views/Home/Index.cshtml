@@ -44,21 +44,38 @@
                     }
                 </div>
                 <span class="competition-prizepool">@c.PrizePool &#x20bd;</span>
-                @if (DateTime.Now.CompareTo(c.ExpDate) < 0)
-                {
-                    <form method="post" asp-controller="Request" asp-action="Create">
-                        @if (User.IsInRole("sportsman") && c.MembersCount > c.Accounts.Where(a => a.RoleId == 2).ToList().Count)
+                @{
+                    @if (DateTime.Now.CompareTo(c.ExpDate) < 0)
+                    {
+                        Account account = ViewBag.Account;
+                        @if (account != null && account.Requests.Exists(r => r.CompetitionId == c.Id))
                         {
-                            <input type="submit" value="Отправить заявку" class="btn btn-outline-success" />
+                            <form method="post" asp-controller="Request" asp-action="Delete">
+                                <input type="hidden" name="id" value="@account.Requests.FirstOrDefault(r => r.CompetitionId == c.Id).Id" />
+                                <input type="submit" value="Отменить заявку" class="btn btn-outline-success" />
+                            </form>
                         }
                         else
                         {
-                            <input type="submit" disabled value="Отправить заявку" class="btn btn-outline-dark" />
+                            <form method="post" asp-controller="Request" asp-action="Create">
+
+                                @if (User.IsInRole("sportsman") && c.MembersCount > c.Accounts.Where(a => a.RoleId == 2).ToList().Count)
+                                {
+                                    <input type="hidden" name="compId" value="@c.Id" />
+                                    <input type="submit" value="Отправить заявку" class="btn btn-outline-success" />
+                                }
+                                else
+                                {
+                                    <input type="submit" disabled value="Отправить заявку" class="btn btn-outline-dark" />
+                                }
+                            </form>
                         }
-                    </form>
-                } else
-                {
-                    <a class="btn btn-outline-primary" asp-controller="Competition" asp-action="Details" asp-route-id="@c.Id">Результаты</a>
+
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-primary" asp-controller="Competition" asp-action="Details" asp-route-id="@c.Id">Результаты</a>
+                    }
                 }
             </div>
         </div>

@@ -29,16 +29,21 @@ namespace Sporting_Events.Controllers
         {
             var competitions = await _context.Competitions
                 .Include(x => x.AppFile)
+                .Include(x => x.Accounts)
                 .Where(x => x.OrganizerId == Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)))
                 .ToListAsync();
             return View(competitions);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var competition = await _context.Competitions
                 .Include(x => x.AppFile)
                 .Include(x => x.Accounts)
+                .ThenInclude(x => x.Results)
+                .Include(x => x.Requests)
+                .ThenInclude(x => x.Account)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (competition == null)
