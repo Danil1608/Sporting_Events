@@ -43,12 +43,16 @@
             }
         </div>
         <span class="competition-prizepool">@Model.PrizePool &#x20bd;</span>
-        @if (DateTime.Now.CompareTo(Model.ExpDate) < 0)
+        @if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) < 0 && User.IsInRole("organizer"))
         {
             <form asp-action="Delete">
                 <input type="hidden" asp-for="Id" />
                 <input type="submit" value="Удалить" class="btn btn-outline-danger" />
             </form>
+        }
+        else if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) > 0)
+        {
+            <span>Проводится</span>
         }
         else
         {
@@ -60,120 +64,263 @@
     @if (DateTime.Now.CompareTo(Model.ExpDate) < 0)
     {
         <p>
-            <a class="btn btn-primary" data-toggle="collapse" href="#accounts" role="button" aria-expanded="false" aria-controls="accounts">
-                Список участников
-            </a>
-            <a class="btn btn-primary" data-toggle="collapse" href="#requests" role="button" aria-expanded="false" aria-controls="requests">
-                Заявки на участие
-            </a>
+            @if (User.IsInRole("organizer"))
+            {
+                <a class="btn btn-primary" data-toggle="collapse" href="#accounts" role="button" aria-expanded="false" aria-controls="accounts">
+                    Список участников
+                </a>
+            }
+            @if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) < 0)
+            {
+                <a class="btn btn-primary" data-toggle="collapse" href="#requests" role="button" aria-expanded="false" aria-controls="requests">
+                    Заявки на участие
+                </a>
+            }
         </p>
-        <div class="collapse" id="accounts">
-            <table border="1" bordercolor="#dee2e6" class="table">
-                <thead>
-                    <tr>
-                        <th>
-                            ФИО Участника
-                        </th>
-                        <th>
-                            Возраст
-                        </th>
-                        <th>
-                            Номер телефона
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var acc in Model.Accounts)
-                    {
+        @if (User.IsInRole("organizer"))
+        {
+            <div class="collapse" id="accounts">
+                <table border="1" bordercolor="#dee2e6" class="table">
+                    <thead>
                         <tr>
-                            <td>
-                                @acc.LastName @acc.Name @acc.MiddleName
-                            </td>
-                            <td>
-                                @acc.Age
-                            </td>
-                            <td>
-                                @acc.Phone
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="collapse" id="requests">
-            <table border="1" bordercolor="#dee2e6" class="table">
-                <thead>
-                    <tr>
-                        <th>
-                            ФИО Участника
-                        </th>
-                        <th>
-                            Возраст
-                        </th>
-                        <th>
-                            Номер телефона
-                        </th>
-                        <th>
-                            Принять
-                        </th>
-                        <th>
-                            Отклонить
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var req in Model.Requests)
-                    {
-                        <tr>
-                            <td>
-                                @req.Account.LastName @req.Account.Name @req.Account.MiddleName
-                            </td>
-                            <td>
-                                @req.Account.Age
-                            </td>
-                            <td>
-                                @req.Account.Phone
-                            </td>
-                            @if (req.Status == "На рассмотрении")
+                            <th>
+                                ФИО Участника
+                            </th>
+                            <th>
+                                Возраст
+                            </th>
+                            <th>
+                                Номер телефона
+                            </th>
+                            @if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) > 0)
                             {
-                                <td>
-                                    <form method="post" asp-action="Update" asp-controller="Request">
-                                        <input type="hidden" value="@req.Id" name="id" />
-                                        <input type="hidden" value="@req.Id" asp-for="@req.Id" />
-                                        <input type="hidden" value="@req.AccountId" asp-for="@req.AccountId" />
-                                        <input type="hidden" value="@req.CompetitionId" asp-for="@req.CompetitionId" />
-                                        <input type="hidden" value="Принята" asp-for="@req.Status" />
-                                        <input type="submit" value="Принять" class="btn btn-success" />
-                                    </form>
-                                </td>
-                                <td>
-                                    <form method="post" asp-action="Update" asp-controller="Request">
-                                        <input type="hidden" value="@req.Id" name="id" />
-                                        <input type="hidden" value="@req.Id" asp-for="@req.Id" />
-                                        <input type="hidden" value="@req.AccountId" asp-for="@req.AccountId" />
-                                        <input type="hidden" value="@req.CompetitionId" asp-for="@req.CompetitionId" />
-                                        <input type="hidden" value="Отклонена" asp-for="@req.Status" />
-                                        <input type="submit" value="Отклонить" class="btn btn-danger" />
-                                    </form>
-                                </td>
-                            } 
-                            else
-                            {
-                                <td>
-                                    @req.Status
-                                </td>
+                                <th>
+                                    Результат
+                                </th>
                             }
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var acc in Model.Accounts)
+                        {
+                            <tr>
+                                <td>
+                                    @acc.LastName @acc.Name @acc.MiddleName
+                                </td>
+                                <td>
+                                    @acc.Age
+                                </td>
+                                <td>
+                                    @acc.Phone
+                                </td>
+                                @if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) > 0)
+                                {
+                                    <td>
+                                        <div class="d-flex">
+                                            <button class="btn btn-outline-primary mr-2" data-toggle="collapse" data-target="#@acc.Login" aria-expanded="false" aria-controls="@acc.Login">Добавить результат</button>
+                                            <form method="post" class="collapse form-inline" id="@acc.Login">
+                                                <input type="hidden" name="competitionId" value="@Model.Id" />
+                                                <input type="hidden" name="accountId" value="@acc.Id" />
+                                                <input name="res" class="form-control w-25" />
+                                                <input type="submit" class="btn btn-primary ml-2" />
+                                            </form>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        @if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) < 0)
+        {
+            <div class="collapse" id="requests">
+                <table border="1" bordercolor="#dee2e6" class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                ФИО Участника
+                            </th>
+                            <th>
+                                Возраст
+                            </th>
+                            <th>
+                                Номер телефона
+                            </th>
+                            <th>
+                                Принять
+                            </th>
+                            <th>
+                                Отклонить
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var req in Model.Requests)
+                        {
+                            <tr>
+                                <td>
+                                    @req.Account.LastName @req.Account.Name @req.Account.MiddleName
+                                </td>
+                                <td>
+                                    @req.Account.Age
+                                </td>
+                                <td>
+                                    @req.Account.Phone
+                                </td>
+                                @if (req.Status == "На рассмотрении")
+                                {
+                                    <td>
+                                        <form method="post" asp-action="Update" asp-controller="Request">
+                                            <input type="hidden" value="@req.Id" name="id" />
+                                            <input type="hidden" value="@req.Id" asp-for="@req.Id" />
+                                            <input type="hidden" value="@req.AccountId" asp-for="@req.AccountId" />
+                                            <input type="hidden" value="@req.CompetitionId" asp-for="@req.CompetitionId" />
+                                            <input type="hidden" value="Принята" asp-for="@req.Status" />
+                                            <input type="submit" value="Принять" class="btn btn-success" />
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form method="post" asp-action="Update" asp-controller="Request">
+                                            <input type="hidden" value="@req.Id" name="id" />
+                                            <input type="hidden" value="@req.Id" asp-for="@req.Id" />
+                                            <input type="hidden" value="@req.AccountId" asp-for="@req.AccountId" />
+                                            <input type="hidden" value="@req.CompetitionId" asp-for="@req.CompetitionId" />
+                                            <input type="hidden" value="Отклонена" asp-for="@req.Status" />
+                                            <input type="submit" value="Отклонить" class="btn btn-danger" />
+                                        </form>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        @req.Status
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
     }
     else
-            {
-                <h2>Результаты</h2>
+    {
+        <h2>Результаты</h2>
+        <table border="1" bordercolor="#dee2e6" class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Место
+                    </th>
+                    <th>
+                        ФИО Участника
+                    </th>
+                    <th>
+                        Возраст
+                    </th>
+                    <th>
+                        Номер телефона
+                    </th>
+                    <th>
+                        Результат
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    List<Result> results = ViewBag.Results;
+                    foreach (var item in results.Select((res, i) => new { i, res }))
+                    {
+                        <tr>
+                            <td>
+                                @(item.i + 1) 
+                            </td>
+                            <td>
+                                @item.res.Account.LastName @item.res.Account.Name @item.res.Account.MiddleName
+                            </td>
+                            <td>
+                                @item.res.Account.Age
+                            </td>
+                            <td>
+                                @item.res.Account.Phone
+                            </td>
+                            <td>
+                                @if (item.res.CompResult != null)
+                                {
+                                    @item.res.CompResult
+                                }
+                                else
+                                {
+                                    <span>Нет результата</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
 
-            }
+            </tbody>
+        </table>
+    }
+    @if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) > 0)
+    {
+        <h2>Предварительные результаты</h2>
+        <table border="1" bordercolor="#dee2e6" class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Место
+                    </th>
+                    <th>
+                        ФИО Участника
+                    </th>
+                    <th>
+                        Возраст
+                    </th>
+                    <th>
+                        Номер телефона
+                    </th>
+                    <th>
+                        Результат
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    List<Result> results = ViewBag.Results;
+                    foreach (var item in results.Select((res, i) => new { i, res }))
+                    {
+                        <tr>
+                            <td>
+                                @(item.i + 1)
+                            </td>
+                            <td>
+                                @item.res.Account.LastName @item.res.Account.Name @item.res.Account.MiddleName
+                            </td>
+                            <td>
+                                @item.res.Account.Age
+                            </td>
+                            <td>
+                                @item.res.Account.Phone
+                            </td>
+                            <td>
+                                @if (item.res.CompResult != null)
+                                {
+                                    @item.res.CompResult
+                                }
+                                else
+                                {
+                                    <span>Нет результата</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
 
 </div>
 
