@@ -91,21 +91,22 @@ body {
     flex-direction: column;
     min-width: 0;
     padding: 16px 20px;
-    flex: 1 0 auto;
+    flex: 1 1 auto;
 }
 
 .competition-card-actions {
+    max-width: 187px;
     display: flex;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     justify-content: space-between;
     flex-direction: column;
-    justify-self: flex-end;
     text-align: center;
     padding: 16px;
 }
 
 .img-container {
-    flex: 0 0 33.333%;
+    max-width: 251px;
+    flex: 0 1 33.333%;
     position: relative;
     min-height: 150px;
     border-radius: 4px 0 0 4px;

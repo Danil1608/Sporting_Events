@@ -9,7 +9,14 @@
     {
         <div class="competition-card d-flex">
             <div class="img-container">
-                <img src="data:image/jpeg;base64,@(Convert.ToBase64String(c.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+                @if (c.AppFile != null)
+                {
+                    <img src="data:image/jpeg;base64,@(Convert.ToBase64String(c.AppFile.Content))" class="competition-image" alt="Фото">
+                }
+                else
+                {
+                    <img src="https://via.placeholder.com/300/f1accd" class="competition-image" alt="Фото">
+                }
             </div>
             <div class="competition-card-info">
                 <div class="mb-2">
@@ -37,16 +44,22 @@
                     }
                 </div>
                 <span class="competition-prizepool">@c.PrizePool &#x20bd;</span>
-                <form method="post" asp-controller="Request" asp-action="Create">
-                    @if (User.IsInRole("sportsman"))
-                    {
-                        <input type="submit" value="Отправить заявку" class="btn btn-outline-success" />
-                    }
-                    else
-                    {
-                        <input type="submit" disabled value="Отправить заявку" class="btn btn-outline-dark" />
-                    }
-                </form>
+                @if (DateTime.Now.CompareTo(c.ExpDate) < 0)
+                {
+                    <form method="post" asp-controller="Request" asp-action="Create">
+                        @if (User.IsInRole("sportsman") && c.MembersCount > c.Accounts.Where(a => a.RoleId == 2).ToList().Count)
+                        {
+                            <input type="submit" value="Отправить заявку" class="btn btn-outline-success" />
+                        }
+                        else
+                        {
+                            <input type="submit" disabled value="Отправить заявку" class="btn btn-outline-dark" />
+                        }
+                    </form>
+                } else
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Competition" asp-action="Details" asp-route-id="@c.Id">Результаты</a>
+                }
             </div>
         </div>
     }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,22 +19,48 @@ namespace Sporting_Events.Controllers
         {
             _context = context;
         }
-
-        // GET: Request
-        public async Task<IActionResult> Index()
+        
+        [Authorize(Roles = "sportsman")]
+        [HttpPost]
+        public async Task<IActionResult> Create(int compId)
         {
-            var appDbContext = _context.Requests.Include(r => r.Account).Include(r => r.Competition);
-            return View(await appDbContext.ToListAsync());
+            var acc = await _context.Accounts.FindAsync(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            Request request = new()
+            {
+                AccountId = acc.Id,
+                CompetitionId= compId,
+                Status = "На рассмотрении"
+            };
+            _context.Add(request);
+            await _context.SaveChangesAsync();
+            
+            return RedirectToAction("Index", "Home");
         }
 
-        // GET: Request/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [Authorize(Roles = "organizer")]
+        [HttpPost]
+        public async Task<IActionResult> Update(int id, Request req)
         {
-            if (id == null)
+            Request request = await _context.Requests.FindAsync(id);
+            request.Status = req.Status;
+
+            if (request.Status == "Принята")
             {
-                return NotFound();
+                Account account = await _context.Accounts.FindAsync(request.AccountId);
+                account.Competitions.Add(request.Competition);
+
+                _context.Accounts.Update(account);
             }
 
+            _context.Requests.Update(request);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Competition", req.CompetitionId);
+        }
+
+        [Authorize(Roles = "sportsman")]
+        public async Task<IActionResult> Delete(int id)
+        {
             var request = await _context.Requests
                 .Include(r => r.Account)
                 .Include(r => r.Competition)
@@ -45,108 +73,7 @@ namespace Sporting_Events.Controllers
             return View(request);
         }
 
-        // GET: Request/Create
-        public IActionResult Create()
-        {
-            ViewData["AccountId"] = new SelectList(_context.Accounts, "Id", "LastName");
-            ViewData["CompetitionId"] = new SelectList(_context.Competitions, "Id", "Description");
-            return View();
-        }
-
-        // POST: Request/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Status,AccountId,CompetitionId")] Request request)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(request);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AccountId"] = new SelectList(_context.Accounts, "Id", "LastName", request.AccountId);
-            ViewData["CompetitionId"] = new SelectList(_context.Competitions, "Id", "Description", request.CompetitionId);
-            return View(request);
-        }
-
-        // GET: Request/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var request = await _context.Requests.FindAsync(id);
-            if (request == null)
-            {
-                return NotFound();
-            }
-            ViewData["AccountId"] = new SelectList(_context.Accounts, "Id", "LastName", request.AccountId);
-            ViewData["CompetitionId"] = new SelectList(_context.Competitions, "Id", "Description", request.CompetitionId);
-            return View(request);
-        }
-
-        // POST: Request/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Status,AccountId,CompetitionId")] Request request)
-        {
-            if (id != request.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(request);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!RequestExists(request.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AccountId"] = new SelectList(_context.Accounts, "Id", "LastName", request.AccountId);
-            ViewData["CompetitionId"] = new SelectList(_context.Competitions, "Id", "Description", request.CompetitionId);
-            return View(request);
-        }
-
-        // GET: Request/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var request = await _context.Requests
-                .Include(r => r.Account)
-                .Include(r => r.Competition)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (request == null)
-            {
-                return NotFound();
-            }
-
-            return View(request);
-        }
-
-        // POST: Request/Delete/5
+        [Authorize(Roles = "sportsman")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -154,12 +81,7 @@ namespace Sporting_Events.Controllers
             var request = await _context.Requests.FindAsync(id);
             _context.Requests.Remove(request);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool RequestExists(int id)
-        {
-            return _context.Requests.Any(e => e.Id == id);
+            return RedirectToAction("Index", "Home");
         }
     }
 }

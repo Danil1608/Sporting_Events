@@ -7,7 +7,15 @@
 <h3>Вы уверены, что хотите удалить это?</h3>
 <div class="competition-card d-flex">
     <div class="img-container">
-        <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+        @if (Model.AppFile != null)
+        {
+            <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+        }
+        else
+        {
+            <img src="https://via.placeholder.com/300/f1accd" class="card-img-top competition-image" alt="Фото">
+        }
+
     </div>
     <div class="competition-card-info">
         <div class="mb-2">

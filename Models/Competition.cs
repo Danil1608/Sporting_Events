@@ -38,6 +38,7 @@ namespace Sporting_Events.Models
         public int? AppFileId { get; set; }
         public AppFile AppFile { get; set; }
 
+        public List<Request> Requests { get; set; } = new();
         public List<Account> Accounts { get; set; } = new();
     }
 }
