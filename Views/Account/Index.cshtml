@@ -1,0 +1,65 @@
+﻿@model List<Account>
+
+@{
+    ViewData["Title"] = "Аккаунты";
+}
+
+<form method="get">
+    <div class="d-flex">
+        <label class="control-label">Выберите роль: </label>
+        <select name="RoleId" class="form-control">
+            <option value="0">Все</option>
+            <option value="2">Спортсмены</option>
+            <option value="3">Организаторы</option>
+        </select>
+    </div>
+    <input type="submit" class="btn btn-primary" value="Подтвердить" />
+</form>
+
+<h1>Аккаунты</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Логин
+            </th>
+            <th>
+                ФИО
+            </th>
+            <th>
+                Возраст
+            </th>
+            <th>
+                Номер телефона
+            </th>
+            <th>
+                Роль
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Login)
+            </td>
+            <td>
+                 @item.LastName @item.Name @item.MiddleName
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Age)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Role.Name)
+            </td>
+            <td>
+                <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

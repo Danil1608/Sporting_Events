@@ -130,7 +130,6 @@ namespace Sporting_Events.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Index(int roleId = 0)
         {
-            ViewBag.Roles = await _context.Roles.ToListAsync();
             List<Account> accounts = new();
             if (roleId == 0)
             {
@@ -146,15 +145,10 @@ namespace Sporting_Events.Controllers
             return View(accounts);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var account = await _context.Accounts
                 .FirstOrDefaultAsync(a => a.Id == id);
             if (account == null)
