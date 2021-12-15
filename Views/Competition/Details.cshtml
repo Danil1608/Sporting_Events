@@ -133,7 +133,7 @@
                 </table>
             </div>
         }
-        @if (DateTime.Now.CompareTo(Model.ExpDate) < 0 && DateTime.Now.CompareTo(Model.Date) < 0)
+        @if (DateTime.Now.CompareTo(Model.Date) < 0)
         {
             <div class="collapse" id="requests">
                 <table border="1" bordercolor="#dee2e6" class="table">

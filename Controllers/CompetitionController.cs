@@ -41,6 +41,8 @@ namespace Sporting_Events.Controllers
             var competition = await _context.Competitions
                 .Include(x => x.AppFile)
                 .Include(x => x.Accounts)
+                .Include(x => x.Requests)
+                .ThenInclude(x => x.Account)
                 .Include(x => x.CompetitionType)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
