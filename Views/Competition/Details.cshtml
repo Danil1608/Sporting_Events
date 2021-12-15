@@ -8,7 +8,14 @@
 
 <div class="competition-card d-flex">
     <div class="img-container">
-        <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+        @if (Model.AppFile != null)
+        {
+            <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.AppFile.Content))" class="card-img-top competition-image" alt="Фото">
+        }
+        else
+        {
+            <img src="https://via.placeholder.com/300/f1accd" class="card-img-top competition-image" alt="Фото">
+        }
     </div>
     <div class="competition-card-info">
         <div class="mb-2">
@@ -36,87 +43,103 @@
             }
         </div>
         <span class="competition-prizepool">@Model.PrizePool &#x20bd;</span>
-        <form asp-action="Delete">
-            <input type="hidden" asp-for="Id" />
-            <input type="submit" value="Удалить" class="btn btn-outline-danger" />
-        </form>
+        @if (DateTime.Now.CompareTo(Model.ExpDate) < 0)
+        {
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <input type="submit" value="Удалить" class="btn btn-outline-danger" />
+            </form>
+        }
+        else
+        {
+            <span>Завершено</span>
+        }
     </div>
 </div>
 <div>
-    <p>
-        <a class="btn btn-primary" data-toggle="collapse" href="#accounts" role="button" aria-expanded="false" aria-controls="accounts">
-            Список участников
-        </a>
-        <a class="btn btn-primary" data-toggle="collapse" href="#requests" role="button" aria-expanded="false" aria-controls="requests">
-            Заявки на участие
-        </a>
-    </p>
-    <div class="collapse" id="accounts">
-        <table>
-            <thead>
-                <tr>
-                    <th>
-                        ФИО Участника
-                    </th>
-                    <th>
-                        Возраст
-                    </th>
-                    <th>
-                        Номер телефона
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var acc in Model.Accounts)
-                {
+    @if (DateTime.Now.CompareTo(Model.ExpDate) < 0)
+    {
+        <p>
+            <a class="btn btn-primary" data-toggle="collapse" href="#accounts" role="button" aria-expanded="false" aria-controls="accounts">
+                Список участников
+            </a>
+            <a class="btn btn-primary" data-toggle="collapse" href="#requests" role="button" aria-expanded="false" aria-controls="requests">
+                Заявки на участие
+            </a>
+        </p>
+        <div class="collapse" id="accounts">
+            <table>
+                <thead>
                     <tr>
-                        <td>
-                            @acc.LastName @acc.Name @acc.MiddleName
-                        </td>
-                        <td>
-                            @acc.Age
-                        </td>
-                        <td>
-                            @acc.Phone
-                        </td>
+                        <th>
+                            ФИО Участника
+                        </th>
+                        <th>
+                            Возраст
+                        </th>
+                        <th>
+                            Номер телефона
+                        </th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    <div class="collapse" id="requests">
-        <table>
-            <thead>
-                <tr>
-                    <th>
-                        ФИО Участника
-                    </th>
-                    <th>
-                        Возраст
-                    </th>
-                    <th>
-                        Номер телефона
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @*@foreach (var acc in Model.Req)
-                {
+                </thead>
+                <tbody>
+                    @foreach (var acc in Model.Accounts)
+                    {
+                        <tr>
+                            <td>
+                                @acc.LastName @acc.Name @acc.MiddleName
+                            </td>
+                            <td>
+                                @acc.Age
+                            </td>
+                            <td>
+                                @acc.Phone
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="collapse" id="requests">
+            <table>
+                <thead>
                     <tr>
-                        <td>
-                            @acc.LastName @acc.Name @acc.MiddleName
-                        </td>
-                        <td>
-                            @acc.Age
-                        </td>
-                        <td>
-                            @acc.Phone
-                        </td>
+                        <th>
+                            ФИО Участника
+                        </th>
+                        <th>
+                            Возраст
+                        </th>
+                        <th>
+                            Номер телефона
+                        </th>
                     </tr>
-                }*@
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                   @* @foreach (var req in Model.Requests)
+                        {
+                            <tr>
+                                <td>
+                                    @acc.LastName @acc.Name @acc.MiddleName
+                                </td>
+                                <td>
+                                    @acc.Age
+                                </td>
+                                <td>
+                                    @acc.Phone
+                                </td>
+                            </tr>
+                        }*@
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+            {
+                <h2>Результаты</h2>
+
+            }
+
 </div>
 
 <a asp-action="Index">Вернуться к списку соревнований</a>
