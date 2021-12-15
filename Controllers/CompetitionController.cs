@@ -131,14 +131,21 @@ namespace Sporting_Events.Controllers
                     }
                 });
             }
-            for (int i = 1; i <= results.Count; ++i)
+
+            var ids = new List<int>();
+            for (int i = 0; i < results.Count; ++i)
             {
-                if (results[i].AccountId == results[i - 1].AccountId)
+                if (ids.Contains(results[i].AccountId))
                 {
-                    results.RemoveAt(i);
-                    --i;
+                    results[i] = null;
+                }
+                else
+                {
+                    ids.Add(results[i].AccountId);
                 }
             }
+
+            results = results.Where(x => x != null).ToList();
 
             ViewBag.Results = results;
 
@@ -166,11 +173,6 @@ namespace Sporting_Events.Controllers
             if (account == null)
             {
                 return NotFound(new { error = "Участник соревнования не найден!" });
-            }
-
-            if (account.Competitions.All(x => x.Id != competitionId))
-            {
-                return BadRequest(new { error = "Спортсмен не зарегестрирован в данном соревновании!" });
             }
 
             var result = new Result
