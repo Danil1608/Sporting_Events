@@ -41,42 +41,31 @@ namespace Sporting_Events.Controllers
         [HttpPost]
         public async Task<IActionResult> Update(int id, Request req)
         {
-            Request request = await _context.Requests.FindAsync(id);
+            Request request = await _context.Requests.Include(x => x.Competition).ThenInclude(x => x.Accounts).FirstOrDefaultAsync(x => x.Id == id);
             request.Status = req.Status;
 
-            if (request.Status == "Принята")
+            if (request.Status == "Принята" && request.Competition.Accounts.Count < request.Competition.MembersCount)
             {
                 Account account = await _context.Accounts.FindAsync(request.AccountId);
                 account.Competitions.Add(request.Competition);
 
                 _context.Accounts.Update(account);
             }
+            else if (request.Competition.Accounts.Count > request.Competition.MembersCount  && request.Status != "Отклонена")
+            {
+                return BadRequest(new { error = "Нет мест" });
+            }
 
             _context.Requests.Update(request);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Details", "Competition", req.CompetitionId);
+            return RedirectToAction("Details", "Competition", new{ id = req.CompetitionId });
         }
 
         [Authorize(Roles = "sportsman")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var request = await _context.Requests
-                .Include(r => r.Account)
-                .Include(r => r.Competition)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (request == null)
-            {
-                return NotFound();
-            }
-
-            return View(request);
-        }
-
-        [Authorize(Roles = "sportsman")]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var request = await _context.Requests.FindAsync(id);
             _context.Requests.Remove(request);

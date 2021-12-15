@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Sporting_Events.Controllers
@@ -18,6 +19,10 @@ namespace Sporting_Events.Controllers
         }
         public async Task<IActionResult> Index(int option = 0)
         {
+            var account = await _context.Accounts.Include(a => a.Requests).FirstOrDefaultAsync(x =>
+                x.Id.ToString() == User.FindFirstValue(ClaimTypes.NameIdentifier));
+            ViewBag.Account = account;
+
             if (option == 1)
             {
                 return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts)
@@ -25,6 +30,12 @@ namespace Sporting_Events.Controllers
             }
 
             if (option == 2)
+            {
+                return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts)
+                    .Include(c => c.CompetitionType).Where(x => (DateTime.Now.CompareTo(x.ExpDate) < 0 && DateTime.Now.CompareTo(x.Date) > 0)).ToListAsync());
+            }
+
+            if (option == 3)
             {
                 return View(await _context.Competitions.Include(x => x.AppFile).Include(c => c.Accounts)
                     .Include(c => c.CompetitionType).Where(x => DateTime.Now.CompareTo(x.ExpDate) > 0).ToListAsync());

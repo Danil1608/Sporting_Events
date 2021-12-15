@@ -29,16 +29,21 @@ namespace Sporting_Events.Controllers
         {
             var competitions = await _context.Competitions
                 .Include(x => x.AppFile)
+                .Include(x => x.Accounts)
                 .Where(x => x.OrganizerId == Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)))
                 .ToListAsync();
             return View(competitions);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var competition = await _context.Competitions
                 .Include(x => x.AppFile)
                 .Include(x => x.Accounts)
+                .Include(x => x.Requests)
+                .ThenInclude(x => x.Account)
+                .Include(x => x.CompetitionType)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (competition == null)
@@ -46,7 +51,169 @@ namespace Sporting_Events.Controllers
                 return NotFound();
             }
 
+            var results = await _context.Results.Include(x => x.Account).Where(x => x.CompetitionId == id).ToListAsync();
+
+            if (competition.CompetitionType.Name == "running" || competition.CompetitionType.Name == "longjumping")
+            {
+                results.Sort((a, b) =>
+                {
+                    if (a == null)
+                    {
+                        if (b == null)
+                        {
+                            return 0;
+                        }
+
+                        return -1;
+                    }
+                    else
+                    {
+                        if (b == null)
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            var first = Convert.ToDouble(a.CompResult);
+                            var second = Convert.ToDouble(b.CompResult);
+
+                            if (Math.Abs(first - second) < 1e-6)
+                            {
+                                return 0;
+                            }
+                            else
+                            {
+                                return first > second ? 1 : -1;
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (competition.CompetitionType.Name == "longjumping")
+            {
+                results.Reverse();
+            }
+
+            if (competition.CompetitionType.Name == "rod")
+            {
+                results.Sort((a, b) =>
+                {
+                    if (a == null)
+                    {
+                        if (b == null)
+                        {
+                            return 0;
+                        }
+
+                        return 1;
+                    }
+                    else
+                    {
+                        if (b == null)
+                        {
+                            return -1;
+                        }
+                        else
+                        {
+                            var first = Convert.ToInt32(a.CompResult);
+                            var second = Convert.ToInt32(b.CompResult);
+
+                            if (first == second)
+                            {
+                                return 0;
+                            }
+                            else
+                            {
+                                return first > second ? -1 : 1;
+                            }
+                        }
+                    }
+                });
+            }
+
+            var ids = new List<int>();
+            for (int i = 0; i < results.Count; ++i)
+            {
+                if (ids.Contains(results[i].AccountId))
+                {
+                    results[i] = null;
+                }
+                else
+                {
+                    ids.Add(results[i].AccountId);
+                }
+            }
+
+            results = results.Where(x => x != null).ToList();
+
+            ViewBag.Results = results;
+
             return View(competition);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "organizer")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Details(int competitionId, string res, int accountId)
+        {
+            var competition = await _context.Competitions
+                .Include(x => x.CompetitionType)
+                .FirstOrDefaultAsync(x => x.Id == competitionId);
+
+            var account = await _context.Accounts
+                .Include(x => x.Competitions)
+                .FirstOrDefaultAsync(x => x.Id == accountId);
+
+            if (competition == null)
+            {
+                return NotFound(new { error = "Соревнование не найдено!" });
+            }
+
+            if (account == null)
+            {
+                return NotFound(new { error = "Участник соревнования не найден!" });
+            }
+
+            var result = new Result
+            {
+                AccountId = accountId,
+                CompetitionId = competitionId,
+                CompResult = ""
+            };
+
+            if (competition.CompetitionType.Name == "rod")
+            {
+                try
+                {
+                    var tmp = Convert.ToInt32(res);
+                }
+                catch (FormatException exception)
+                {
+                    return BadRequest(new { error = "Результат записан некорректно!" });
+                }
+
+                result.CompResult = res;
+            }
+
+            if (competition.CompetitionType.Name == "running" || competition.CompetitionType.Name == "longjumping")
+            {
+                try
+                {
+                    var tmp = Convert.ToDouble(res);
+                }
+                catch (FormatException exception)
+                {
+                    return BadRequest(new { error = "Результат записан некорректно!" });
+                }
+
+                result.CompResult = res;
+            }
+
+            await _context.Results.AddAsync(result);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Competition", new { id = competitionId });
         }
 
         [HttpGet]
@@ -202,7 +369,7 @@ namespace Sporting_Events.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "organizer")]
+        [Authorize(Roles = "organizer, admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var competition = await _context.Competitions.Include(c => c.AppFile).FirstOrDefaultAsync(c => c.Id == id);
@@ -215,21 +382,27 @@ namespace Sporting_Events.Controllers
             return View(competition);
         }
 
-        [Authorize(Roles = "organizer")]
+        [Authorize(Roles = "organizer, admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var competition = await _context.Competitions.FindAsync(id);
 
-            if (competition.OrganizerId != Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            if(User.IsInRole("admin"))
+            {
+                _context.Competitions.Remove(competition);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", "Home");
+            } else if (competition.OrganizerId != Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            {
+                _context.Competitions.Remove(competition);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            } else
             {
                 return Forbid();
             }
-
-            _context.Competitions.Remove(competition);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -114,23 +114,9 @@ namespace Sporting_Events.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> Profile()
-        {
-            var accountId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            Account account = await _context.Accounts
-                .Include(a => a.Role)
-                .Include(a => a.Competitions)
-                .FirstOrDefaultAsync(a => a.Id == accountId);
-
-            return View(account);
-        }
-
-        [HttpGet]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Index(int roleId = 0)
         {
-            ViewBag.Roles = await _context.Roles.ToListAsync();
             List<Account> accounts = new();
             if (roleId == 0)
             {
@@ -146,15 +132,10 @@ namespace Sporting_Events.Controllers
             return View(accounts);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var account = await _context.Accounts
                 .FirstOrDefaultAsync(a => a.Id == id);
             if (account == null)

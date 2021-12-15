@@ -1,0 +1,44 @@
+﻿@model Sporting_Events.Models.Account
+
+@{
+    ViewData["Title"] = "Удаление";
+}
+
+<h3>Вы уверены, что хотите удалить аккаунт?</h3>
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Логин
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Login
+        </dd>
+        <dt class="col-sm-2">
+            ФИО
+        </dt>
+        <dd class="col-sm-10">
+            @Model.LastName @Model.Name @Model.MiddleName
+        </dd>
+        <dt class="col-sm-2">
+            Возраст
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Age
+        </dd>
+        <dt class="col-sm-2">
+            Номер телефона
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Phone
+        </dd>
+    </dl>
+
+    <form method="post" asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Удалить" class="btn btn-danger" /> |
+        <a asp-action="Index">К списку аккаунтов</a>
+    </form>
+</div>

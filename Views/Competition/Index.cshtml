@@ -49,16 +49,19 @@
             </div>
             <span class="competition-prizepool">@c.PrizePool &#x20bd;</span>
             <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@c.Id">Подробнее</a>
-            @if (DateTime.Now.CompareTo(c.ExpDate) < 0)
+            @if (DateTime.Now.CompareTo(c.ExpDate) < 0 && DateTime.Now.CompareTo(c.Date) < 0 && User.IsInRole("organizer"))
             {
                 <a class="btn btn-outline-primary" asp-action="Update" asp-route-id="@c.Id">Редактировать</a>
                 <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@c.Id">Удалить</a>
+            }
+            else if (DateTime.Now.CompareTo(c.ExpDate) < 0 && DateTime.Now.CompareTo(c.Date) > 0)
+            {
+                <span>Проводится</span>
             }
             else
             {
                 <span>Завершено</span>
             }
-
         </div>
     </div>
 }
